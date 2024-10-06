@@ -9,10 +9,10 @@ export default function Home() {
       <input
         type="text"
         placeholder="TCNO/Ad/Soyad"
-        className="border border-gray-400 dark:border-gray-600 p-2 rounded-md w-64 mb-4 bg-background text-foreground"
+        className="border border-gray-400 dark:border-gray-600 p-2 rounded-md w-64 h-10 bg-background text-foreground"
       />
-      <button className="px-4 py-2 rounded-md bg-background text-foreground border border-gray-400 dark:border-gray-600">
-        Search
+      <button className="px-4 py-2 h-10 rounded-md bg-background text-foreground border border-gray-400 dark:border-gray-600">
+        Ara
       </button>
       </div>
     </div>
