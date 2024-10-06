@@ -1,3 +1,4 @@
+import UserTable from "@/components/UserTable";
 import Image from "next/image";
 
 export default function Home() {
@@ -5,7 +6,7 @@ export default function Home() {
     <div className="min-h-screen flex flex-col items-center justify-center bg-background text-foreground">
       <h1 className="text-5xl font-bold mb-6">MedSearch</h1>
       <p className="text-xl mb-4">Aramak için bilgileri girin</p>
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-2 mb-6">
       <input
         type="text"
         placeholder="TCNO/Ad/Soyad"
@@ -15,6 +16,7 @@ export default function Home() {
         Ara
       </button>
       </div>
+      <UserTable/>
     </div>
   );
 }
