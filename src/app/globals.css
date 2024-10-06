@@ -3,15 +3,22 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #ffffff; /* Light mode background */
+  --foreground: #171717; /* Light mode text */
 }
 
+/* System-based dark mode */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0a0a0a; /* Dark mode background for system preferences */
+    --foreground: #ededed; /* Dark mode text for system preferences */
   }
+}
+
+/* Manual dark mode with the 'dark' class */
+.dark {
+  --background: #0a0a0a; /* Dark mode background for manual toggle */
+  --foreground: #ededed; /* Dark mode text for manual toggle */
 }
 
 body {
@@ -20,6 +27,7 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Custom utility */
 @layer utilities {
   .text-balance {
     text-wrap: balance;
