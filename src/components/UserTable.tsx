@@ -10,7 +10,8 @@ const mockUsers = [
     birthDate: new Date(),
     nameOfMother: "X123",
     nameOfFather: "X123",
-    birthPlace: "İstanbul",
+    city: "İstanbul",
+    county:"Ataşehir"
   },
   {
     tcNo: 2,
@@ -19,7 +20,8 @@ const mockUsers = [
     birthDate: new Date(),
     nameOfMother: "X456",
     nameOfFather: "X123",
-    birthPlace: "İstanbul",
+    city: "İstanbul",
+    county:"Ataşehir"
   },
   {
     tcNo: 3,
@@ -28,7 +30,8 @@ const mockUsers = [
     birthDate: new Date(),
     nameOfMother: "X789",
     nameOfFather: "X123",
-    birthPlace: "İstanbul",
+    city: "İstanbul",
+    county:"Ataşehir"
   },
   {
     tcNo: 4,
@@ -37,7 +40,8 @@ const mockUsers = [
     birthDate: new Date(),
     nameOfMother: "X101",
     nameOfFather: "X123",
-    birthPlace: "İstanbul",
+    city: "İstanbul",
+    county:"Ataşehir"
   },
   // Add more mock data as needed
 ];
@@ -67,7 +71,10 @@ const UserTable = () => {
               Baba Adı
             </th>
             <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left">
-              Doğum Yeri
+              Nüfüs İl
+            </th>
+            <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left">
+              Nüfüs İlçe
             </th>
           </tr>
         </thead>
@@ -93,7 +100,10 @@ const UserTable = () => {
                 {user.nameOfFather}
               </td>
               <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">
-                {user.birthPlace}
+                {user.city}
+              </td>
+              <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">
+                {user.county}
               </td>
               <td className="border border-gray-300 dark:border-gray-600 px-2 py-2 w-8 text-center">
                 <button className="text-blue-500 hover:text-blue-700 p-1">

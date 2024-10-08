@@ -21,7 +21,7 @@ const SearchFilter = () => {
       const formData = {
         startDate: formRef.current['startDate'].value,
         endDate: formRef.current['endDate'].value,
-        birthPlace: formRef.current['birthPlace'].value,
+        city: formRef.current['city'].value,
         motherName: formRef.current['motherName'].value,
         fatherName: formRef.current['fatherName'].value
       };
@@ -86,11 +86,10 @@ const SearchFilter = () => {
                </div>
              </div>
    
-             {/* Birth Place (Combo Box) */}
              <div>
-               <label className="block text-xs mb-1">Doğum Yeri</label>
+               <label className="block text-xs mb-1">Nüfus İl</label>
                <select
-                 name="birthPlace"
+                 name="city"
                  className="w-full p-1 border border-gray-300 dark:border-gray-600 rounded-md bg-background text-foreground text-sm"
                >
                  <option value="">Seçiniz</option>
