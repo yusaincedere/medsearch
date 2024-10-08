@@ -52,10 +52,10 @@ const UserTable = () => {
               Tc
             </th>
             <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left">
-              Ad
+              Adı
             </th>
             <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left">
-              Soyad
+              Soyadı
             </th>
             <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left">
               Doğum Tarihi
