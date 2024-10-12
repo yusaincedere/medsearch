@@ -1,55 +1,33 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSearch } from "@fortawesome/free-solid-svg-icons";
+import { FC } from "react";
 
-// Mock data
-const mockUsers = [
-  {
-    tcNo: 1,
-    name: "John",
-    surname: "Doe",
-    birthDate: new Date(),
-    nameOfMother: "X123",
-    nameOfFather: "X123",
-    city: "İstanbul",
-    county:"Ataşehir"
-  },
-  {
-    tcNo: 2,
-    name: "Jane",
-    surname: "Smith",
-    birthDate: new Date(),
-    nameOfMother: "X456",
-    nameOfFather: "X123",
-    city: "İstanbul",
-    county:"Ataşehir"
-  },
-  {
-    tcNo: 3,
-    name: "Alex",
-    surname: "Johnson",
-    birthDate: new Date(),
-    nameOfMother: "X789",
-    nameOfFather: "X123",
-    city: "İstanbul",
-    county:"Ataşehir"
-  },
-  {
-    tcNo: 4,
-    name: "Emma",
-    surname: "Watson",
-    birthDate: new Date(),
-    nameOfMother: "X101",
-    nameOfFather: "X123",
-    city: "İstanbul",
-    county:"Ataşehir"
-  },
-  // Add more mock data as needed
-];
+interface UserTableProps {
+  userData: User[];
+  totalPages: number;
+  currentPage: number;
+  onPageChange: (page: number) => void; // Sayfa değişikliklerinde tetiklenen fonksiyon
+}
 
-const UserTable = () => {
+const UserTable: FC<UserTableProps> = ({
+  userData,
+  totalPages,
+  currentPage,
+  onPageChange,
+}) => {
+  // Sayfa değişikliklerini tetikleyen fonksiyon
+  const handlePageChange = (newPage: number) => {
+    if (newPage > 0 && newPage <= totalPages) {
+      onPageChange(newPage); // Parent bileşene sayfa değişimini bildiriyoruz
+    }
+  };
+
+  const formatDate = (dateString: string): string => {
+    const [day, month, year] = dateString.split(".");
+    return `${year}-${month}-${day}`;
+  };
+
   return (
     <div className="w-full max-w-4xl overflow-x-auto">
-      <table className="min-w-full table-auto border-collapse border border-gray-200 dark:border-gray-700">
+      <table className="min-w-full table-auto border-collapse border border-gray-200 dark:border-gray-700  ">
         <thead className="bg-base-100 text-base-content">
           <tr>
             <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left">
@@ -71,49 +49,75 @@ const UserTable = () => {
               Baba Adı
             </th>
             <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left">
-              Nüfüs İl
+              Nüfus İl
             </th>
             <th className="border border-gray-300 dark:border-gray-600 px-4 py-2 text-left">
-              Nüfüs İlçe
+              Nüfus İlçe
             </th>
           </tr>
         </thead>
         <tbody>
-          {mockUsers.map((user) => (
-            <tr key={user.tcNo} className="bg-base-100 dark:bg-gray-800">
-              <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">
-                {user.tcNo}
-              </td>
-              <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">
-                {user.name}
-              </td>
-              <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">
-                {user.surname}
-              </td>
-              <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">
-                {user.birthDate.toLocaleDateString()}
-              </td>
-              <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">
-                {user.nameOfMother}
-              </td>
-              <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">
-                {user.nameOfFather}
-              </td>
-              <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">
-                {user.city}
-              </td>
-              <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">
-                {user.county}
-              </td>
-              <td className="border border-gray-300 dark:border-gray-600 px-2 py-2 w-8 text-center">
-                <button className="text-blue-500 hover:text-blue-700 p-1">
-                  <FontAwesomeIcon icon={faSearch} className="w-4 h-4" />
-                </button>
+          {userData.length > 0 ? (
+            userData.map((user) => (
+              <tr key={user.tc}>
+                <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">
+                  {user.tc}
+                </td>
+                <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">
+                  {user.name}
+                </td>
+                <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">
+                  {user.surname}
+                </td>
+                <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">
+                  {new Date(formatDate(user.birthDate)).toLocaleDateString()}
+                </td>
+                <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">
+                  {user.nameOfMother}
+                </td>
+                <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">
+                  {user.nameOfFather}
+                </td>
+                <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">
+                  {user.city}
+                </td>
+                <td className="border border-gray-300 dark:border-gray-600 px-4 py-2">
+                  {user.county}
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan={8} className="text-center py-4">
+                Veri bulunamadı
               </td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
+
+      {/* Pagination Kontrolleri */}
+      {totalPages > 1 && (
+        <div className="flex justify-between mt-4">
+          <button
+            className="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded"
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            Önceki
+          </button>
+          <span className="px-3 py-1">
+            Sayfa {currentPage} / {totalPages}
+          </span>
+          <button
+            className="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded"
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
+            Sonraki
+          </button>
+        </div>
+      )}
     </div>
   );
 };

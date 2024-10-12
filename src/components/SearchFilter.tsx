@@ -2,22 +2,28 @@
 import { useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
+import axios from "axios";
 import { getCityList } from "../apiCalls/ExternalApi";
-
+import { DbUserRow } from "@/types/dnbUserRow";
 
 type City = {
-    id: number;
-    name: string;
-  };
+  id: number;
+  name: string;
+};
 
-const SearchFilter = () => {
+interface SearchFilterProps {
+  onSearch: (data: User[], page: number, totalPages: number) => void;
+  currentPage: number;
+}
+
+const SearchFilter: React.FC<SearchFilterProps> = ({ onSearch, currentPage }) => {
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
   const [cityList, setCityList] = useState<City[]>([]);
   const formRef = useRef<HTMLFormElement | null>(null);
+  const [loading, setLoading] = useState(false);
+
   const toggleAdvancedFilters = () => {
-    setIsAdvancedOpen((prevState) => {
-      return !prevState;
-    });
+    setIsAdvancedOpen((prevState) => !prevState);
   };
 
   useEffect(() => {
@@ -27,73 +33,131 @@ const SearchFilter = () => {
   const fetchCities = async () => {
     try {
       const cityData = await getCityList();
-      console.log(cityData.data);
       setCityList(cityData.data); // Şehir verilerini state'e set et
     } catch (error) {
       console.error("Error fetching cities:", error);
     }
   };
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
 
+  // Arama işlemi (basit arama veya gelişmiş arama için form submit)
+  const handleSearch = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     if (formRef.current) {
-      // Access form values using formRef and input names
+      setLoading(true);
+
       const formData = {
-        startDate: formRef.current["startDate"].value,
-        endDate: formRef.current["endDate"].value,
-        city: formRef.current["city"].value,
-        motherName: formRef.current["motherName"].value,
-        fatherName: formRef.current["fatherName"].value,
+        tc: formRef.current["tc"]?.value, // TC Kimlik No için alan
+        name: formRef.current["nameInput"]?.value, // İsim alanı
+        surname: formRef.current["surname"]?.value, // Soyisim alanı
+        startDate: formRef.current["startDate"]?.value,
+        endDate: formRef.current["endDate"]?.value,
+        city: formRef.current["city"]?.value,
+        motherName: formRef.current["motherName"]?.value,
+        fatherName: formRef.current["fatherName"]?.value,
       };
 
-      console.log("Form Data Submitted: ", formData);
+      try {
+        // API çağrısı ile verileri getiriyoruz
+        const response = await axios.post("/api/users", {
+          page: currentPage,
+          limit: 10,
+          filters: {
+            tc: formData.tc, // TC No'ya göre filtreleme
+            name: formData.name, // İsme göre filtreleme
+            surname: formData.surname, // Soyisme göre filtreleme
+            startDate: formData.startDate,
+            endDate: formData.endDate,
+            city: formData.city,
+            motherName: formData.motherName,
+            fatherName: formData.fatherName,
+          },
+        });
 
-      // Process formData further or send it to a backend
+        if (response?.data?.data) {
+          const users: User[] = mapDbToUserArray(response?.data?.data);
+          onSearch(users, currentPage, response.data.pagination?.totalPages);
+        }
+        console.log("Search Results:", response.data);
+      } catch (error) {
+        console.error("Search Error:", error);
+      } finally {
+        setLoading(false);
+      }
     }
+  };
+
+  const mapDbToUser = (dbRow: DbUserRow): User => {
+    return {
+      tc: dbRow.TC,
+      name: dbRow.NAME,
+      surname: dbRow.SURNAME,
+      birthDate: dbRow.BIRTHDATE,
+      nameOfMother: dbRow.MOTHERNAME,
+      nameOfFather: dbRow.FATHERNAME,
+      fatherTC: dbRow.FATHERTC,
+      motherTC: dbRow.MOTHERTC,
+      city: dbRow.CITY,
+      county: dbRow.COUNTY,
+    };
+  };
+
+  const mapDbToUserArray = (dbRows: DbUserRow[]): User[] => {
+    return dbRows.map(mapDbToUser);
   };
 
   return (
     <div className="w-full max-w-4xl mb-8 mt-8">
-      {/* Search Bar and Advanced Filters on the Same Row */}
-      <div className="flex items-center mb-6">
-        {/* Search Input and Button */}
-        <div className="flex items-center space-x-2">
-          <input
-            type="text"
-            placeholder="TCNO/Ad/Soyad"
-            className="border border-gray-400 dark:border-gray-600 p-2 rounded-md w-64 h-10 bg-background text-foreground"
-          />
-          <button className="px-4 py-2 h-10 rounded-md bg-background text-foreground border border-gray-400 dark:border-gray-600">
-            Ara
-          </button>
-        </div>
-        <div className="ml-auto">
-          <button
-            onClick={toggleAdvancedFilters}
-            className="text-blue-500 hover:text-blue-700 flex items-center space-x-2"
-          >
-            <span>Gelişmiş Arama</span>
-            <FontAwesomeIcon
-              icon={isAdvancedOpen ? faChevronUp : faChevronDown}
+      <form ref={formRef} onSubmit={handleSearch}>
+        {/* Arama Inputları */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+          <div className="flex flex-col">
+            <label className="block text-xs mb-1">TC Kimlik No</label>
+            <input
+              type="text"
+              name="tc"
+              placeholder="TC Kimlik No"
+              className="border border-gray-400 dark:border-gray-600 p-2 rounded-md w-full bg-background text-foreground"
             />
+          </div>
+          <div className="flex flex-col">
+            <label className="block text-xs mb-1">Ad</label>
+            <input
+              type="text"
+              name="nameInput"
+              placeholder="Ad"
+              className="border border-gray-400 dark:border-gray-600 p-2 rounded-md w-full bg-background text-foreground"
+            />
+          </div>
+          <div className="flex flex-col">
+            <label className="block text-xs mb-1">Soyad</label>
+            <input
+              type="text"
+              name="surname"
+              placeholder="Soyad"
+              className="border border-gray-400 dark:border-gray-600 p-2 rounded-md w-full bg-background text-foreground"
+            />
+          </div>
+        </div>
+
+        <div className="flex justify-end">
+          <button
+            className="px-4 py-2 h-10 rounded-md bg-background text-foreground border border-gray-400 dark:border-gray-600"
+            type="submit"
+          >
+            {loading ? "Ara..." : "Ara"}
           </button>
         </div>
-      </div>
 
-      {/* Collapsible Advanced Filters (Display if Open) */}
-      {isAdvancedOpen && (
-        <div className="mt-4 p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg " >
-          <h2 className="text-base font-medium mb-2">Gelişmiş Filtreler</h2>
+        {/* Gelişmiş Arama Filtreleri (collapse yapısı) */}
+        {isAdvancedOpen && (
+          <div className="mt-4 p-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg">
+            <h2 className="text-base font-medium mb-2">Gelişmiş Filtreler</h2>
 
-          {/* Form Element */}
-          <form ref={formRef} onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {/* Date Range Filter */}
               <div className="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs mb-1">
-                    Doğum Tarihi Başlangıç
-                  </label>
+                  <label className="block text-xs mb-1">Doğum Tarihi Başlangıç</label>
                   <input
                     type="date"
                     name="startDate"
@@ -101,9 +165,7 @@ const SearchFilter = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs mb-1">
-                    Doğum Tarihi Bitiş
-                  </label>
+                  <label className="block text-xs mb-1">Doğum Tarihi Bitiş</label>
                   <input
                     type="date"
                     name="endDate"
@@ -112,11 +174,12 @@ const SearchFilter = () => {
                 </div>
               </div>
 
+              {/* City Filter */}
               <div>
                 <label className="block text-xs mb-1">Nüfus İl</label>
                 <select
                   name="city"
-                  className="w-full p-1 border border-gray-300 dark:border-gray-600 rounded-md bg-background text-foreground text-sm"   
+                  className="w-full p-1 border border-gray-300 dark:border-gray-600 rounded-md bg-background text-foreground text-sm"
                 >
                   <option value="">Seçiniz</option>
                   {cityList?.map((city) => (
@@ -148,18 +211,18 @@ const SearchFilter = () => {
               </div>
             </div>
 
-            {/* Submit Button */}
+            {/* Filtreleme Butonu */}
             <div className="flex justify-end mt-3">
               <button
                 type="submit"
                 className="px-3 py-1 bg-blue-500 text-white rounded-md text-sm"
               >
-                Filtrele
+                {loading ? "Filtrele..." : "Filtrele"}
               </button>
             </div>
-          </form>
-        </div>
-      )}
+          </div>
+        )}
+      </form>
     </div>
   );
 };

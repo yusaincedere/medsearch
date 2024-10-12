@@ -33,3 +33,12 @@ body {
     text-wrap: balance;
   }
 }
+.table-container {
+  width: 100%; /* Tablonun kapsayıcı genişliğini %100 yapıyoruz */
+  overflow-x: auto; /* Sadece gerektiğinde yatay kaydırmayı göster */
+}
+
+table {
+  width: 100%; /* Tablonun genişliğini %100 yaparak kapsayıcıya uymasını sağlıyoruz */
+  table-layout: auto; /* Tablonun genişliği otomatik ayarlanır */
+}
