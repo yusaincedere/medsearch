@@ -2,6 +2,7 @@
 import { useState } from "react";
 import SearchFilter from "@/components/SearchFilter";
 import UserTable from "@/components/UserTable";
+import { User } from "@/types/user";
 
 // User tipini tanımlıyoruz
 

@@ -1,4 +1,4 @@
-type User = {
+export type User = {
     tc: string;
     name: string;
     surname: string;

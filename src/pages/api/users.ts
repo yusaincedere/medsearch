@@ -11,14 +11,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const { page = 1, limit = 10, filters } = req.body;
 
     // Gelen filtreleri işleme
-    const filterObject: UserFilter = {
-      name: filters?.name || undefined,
-      surname: filters?.surname || undefined,
-      city: filters?.city || undefined,
-    };
 
     // getUsers fonksiyonunu çağır
-    const result = await getUsers(Number(page), Number(limit), filterObject);
+    const result = await getUsers(Number(page), Number(limit), filters);
     console.log(result)
     // Başarılı yanıt
     return res.status(200).json(result);

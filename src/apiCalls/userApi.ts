@@ -1,6 +1,7 @@
 import axios from "axios";
 import { DbUserRow } from "@/types/dnbUserRow";
 import { UserFilter } from "@/types/filters";
+import { User } from "@/types/user";
 
 export const mapDbToUserArray = (dbRows: DbUserRow[]): User[] => {
   return dbRows.map((dbRow: DbUserRow) => ({
@@ -20,6 +21,7 @@ export const mapDbToUserArray = (dbRows: DbUserRow[]): User[] => {
 // Veritabanından kullanıcı verilerini çekmek için ortak fonksiyon
 export const getUsers = async (filters: UserFilter, page: number, limit: number) => {
   try {
+    console.log("apiiiiiiiiiiiiiii",filters)
     const response = await axios.post("/api/users", {
       page,
       limit,

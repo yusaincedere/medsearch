@@ -1,5 +1,6 @@
 import { FC } from "react";
 import Pagination from "./Pagination";
+import { User } from "@/types/user";
 
 interface UserTableProps {
   userData: User[];

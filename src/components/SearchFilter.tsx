@@ -5,6 +5,8 @@ import { faChevronDown, faChevronUp, faSearch } from "@fortawesome/free-solid-sv
 import { getUsers } from "../apiCalls/userApi"; // Ortak Axios fonksiyonumuzu ekliyoruz
 import { getCityList } from "@/apiCalls/ExternalApi";
 import { City } from "@/types/city";
+import { User } from "@/types/user";
+import { UserFilter } from "@/types/filters";
 
 interface SearchFilterProps {
   onSearch: (data: User[], page: number, totalPages: number, totalUser: number) => void;
@@ -41,18 +43,17 @@ const SearchFilter: React.FC<SearchFilterProps> = ({ onSearch, currentPage, setC
   const fetchData = async (page: number) => {
     setLoading(true);
     if (formRef.current) {
-      const formData = {
+      const formData :UserFilter = {
         tc: formRef.current["tc"]?.value || "", // TC Kimlik No'yu string olarak gönderiyoruz
         name: formRef.current["nameInput"]?.value || "",
         surname: formRef.current["surname"]?.value || "",
-        startDate: formRef.current["startDate"]?.value || "",
-        endDate: formRef.current["endDate"]?.value || "",
+        birthDateStart: formRef.current["startDate"]?.value || "",
+        birthDateEnd: formRef.current["endDate"]?.value || "",
         city: formRef.current["city"]?.value || "",
         motherName: formRef.current["motherName"]?.value || "",
         fatherName: formRef.current["fatherName"]?.value || "",
       };
-  
-      // Boş alanları filtreliyoruz
+
       const filters = Object.fromEntries(Object.entries(formData).filter(([_, v]) => v !== ""));
       const { users, totalPages, total } = await getUsers(filters, page, 10); // Axios API fonksiyonu
 

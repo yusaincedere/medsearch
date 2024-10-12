@@ -20,8 +20,9 @@ export const getUsers = async (page: number, limit: number, filters: UserFilter)
     let countQuery = 'SELECT COUNT(*) as total FROM medinfo WHERE 1=1';
     const params: any[] = [];
     const countParams: any[] = [];
-    
-    console.log(filters)
+
+    console.log(filters);
+
     // TC filtreleme
     if (filters.tc && filters.tc.trim() !== "") {
       query += ' AND tc = ?';
@@ -31,19 +32,51 @@ export const getUsers = async (page: number, limit: number, filters: UserFilter)
     }
 
     // İsim filtreleme
-    if (filters.name) {
+    if (filters.name && filters.name.trim() !== "") {
       query += ' AND name = ?';
       countQuery += ' AND name = ?';
-      params.push(`${filters.name}`);
-      countParams.push(`${filters.name}`);
+      params.push(filters.name.trim());
+      countParams.push(filters.name.trim());
     }
 
     // Soyisim filtreleme
-    if (filters.surname) {
+    if (filters.surname && filters.surname.trim() !== "") {
       query += ' AND surname = ?';
       countQuery += ' AND surname = ?';
-      params.push(`${filters.surname}`);
-      countParams.push(`${filters.surname}`);
+      params.push(filters.surname.trim());
+      countParams.push(filters.surname.trim());
+    }
+
+    // Şehir filtreleme
+    if (filters.city && filters.city.trim() !== "") {
+      query += ' AND city = ?';
+      countQuery += ' AND city = ?';
+      params.push(filters.city.trim());
+      countParams.push(filters.city.trim());
+    }
+
+    // Anne adı filtreleme
+    if (filters.motherName && filters.motherName.trim() !== "") {
+      query += ' AND motherName = ?';
+      countQuery += ' AND motherName = ?';
+      params.push(filters.motherName.trim());
+      countParams.push(filters.motherName.trim());
+    }
+
+    // Baba adı filtreleme
+    if (filters.fatherName && filters.fatherName.trim() !== "") {
+      query += ' AND fatherName = ?';
+      countQuery += ' AND fatherName = ?';
+      params.push(filters.fatherName.trim());
+      countParams.push(filters.fatherName.trim());
+    }
+
+    // Doğum tarihi aralığı (between)
+    if (filters.birthDateStart && filters.birthDateEnd) {
+      query += ' AND STR_TO_DATE(birthDate, "%d.%m.%Y") BETWEEN STR_TO_DATE(?, "%Y-%m-%d") AND STR_TO_DATE(?, "%Y-%m-%d")';
+      countQuery += ' AND STR_TO_DATE(birthDate, "%d.%m.%Y") BETWEEN STR_TO_DATE(?, "%Y-%m-%d") AND STR_TO_DATE(?, "%Y-%m-%d")';
+      params.push(filters.birthDateStart, filters.birthDateEnd);
+      countParams.push(filters.birthDateStart, filters.birthDateEnd);
     }
 
     // Limit ve offset ekleme
