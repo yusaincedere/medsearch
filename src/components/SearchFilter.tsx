@@ -1,109 +1,79 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
-import axios from "axios";
-import { getCityList } from "../apiCalls/ExternalApi";
-import { DbUserRow } from "@/types/dnbUserRow";
-
-type City = {
-  id: number;
-  name: string;
-};
+import { faChevronDown, faChevronUp, faSearch } from "@fortawesome/free-solid-svg-icons";
+import { getUsers } from "../apiCalls/userApi"; // Ortak Axios fonksiyonumuzu ekliyoruz
+import { getCityList } from "@/apiCalls/ExternalApi";
+import { City } from "@/types/city";
 
 interface SearchFilterProps {
-  onSearch: (data: User[], page: number, totalPages: number) => void;
+  onSearch: (data: User[], page: number, totalPages: number, totalUser: number) => void;
   currentPage: number;
+  setCurrentPage: (page: number) => void;
 }
 
-const SearchFilter: React.FC<SearchFilterProps> = ({ onSearch, currentPage }) => {
+const SearchFilter: React.FC<SearchFilterProps> = ({ onSearch, currentPage, setCurrentPage }) => {
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
   const [cityList, setCityList] = useState<City[]>([]);
   const formRef = useRef<HTMLFormElement | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // Gelişmiş filtreleme alanını açıp kapatma fonksiyonu
   const toggleAdvancedFilters = () => {
     setIsAdvancedOpen((prevState) => !prevState);
   };
 
-  useEffect(() => {
-    fetchCities();
-  }, []);
-
+  // Şehir verilerini API'den çeken fonksiyon
   const fetchCities = async () => {
     try {
       const cityData = await getCityList();
-      setCityList(cityData.data); // Şehir verilerini state'e set et
+      setCityList(cityData.data);
     } catch (error) {
       console.error("Error fetching cities:", error);
     }
   };
 
-  // Arama işlemi (basit arama veya gelişmiş arama için form submit)
-  const handleSearch = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  useEffect(() => {
+    fetchCities(); // Sayfa yüklendiğinde şehir verilerini alır
+  }, []);
+
+  // Ortak fonksiyonla API'den veri çekiyoruz (sayfa ve filtrelere göre)
+  const fetchData = async (page: number) => {
+    setLoading(true);
     if (formRef.current) {
-      setLoading(true);
-
       const formData = {
-        tc: formRef.current["tc"]?.value, // TC Kimlik No için alan
-        name: formRef.current["nameInput"]?.value, // İsim alanı
-        surname: formRef.current["surname"]?.value, // Soyisim alanı
-        startDate: formRef.current["startDate"]?.value,
-        endDate: formRef.current["endDate"]?.value,
-        city: formRef.current["city"]?.value,
-        motherName: formRef.current["motherName"]?.value,
-        fatherName: formRef.current["fatherName"]?.value,
+        tc: formRef.current["tc"]?.value || "", // TC Kimlik No'yu string olarak gönderiyoruz
+        name: formRef.current["nameInput"]?.value || "",
+        surname: formRef.current["surname"]?.value || "",
+        startDate: formRef.current["startDate"]?.value || "",
+        endDate: formRef.current["endDate"]?.value || "",
+        city: formRef.current["city"]?.value || "",
+        motherName: formRef.current["motherName"]?.value || "",
+        fatherName: formRef.current["fatherName"]?.value || "",
       };
+  
+      // Boş alanları filtreliyoruz
+      const filters = Object.fromEntries(Object.entries(formData).filter(([_, v]) => v !== ""));
+      const { users, totalPages, total } = await getUsers(filters, page, 10); // Axios API fonksiyonu
 
-      try {
-        // API çağrısı ile verileri getiriyoruz
-        const response = await axios.post("/api/users", {
-          page: currentPage,
-          limit: 10,
-          filters: {
-            tc: formData.tc, // TC No'ya göre filtreleme
-            name: formData.name, // İsme göre filtreleme
-            surname: formData.surname, // Soyisme göre filtreleme
-            startDate: formData.startDate,
-            endDate: formData.endDate,
-            city: formData.city,
-            motherName: formData.motherName,
-            fatherName: formData.fatherName,
-          },
-        });
-
-        if (response?.data?.data) {
-          const users: User[] = mapDbToUserArray(response?.data?.data);
-          onSearch(users, currentPage, response.data.pagination?.totalPages);
-        }
-        console.log("Search Results:", response.data);
-      } catch (error) {
-        console.error("Search Error:", error);
-      } finally {
-        setLoading(false);
-      }
+      onSearch(users, page, totalPages, total);
     }
+    setLoading(false);
   };
 
-  const mapDbToUser = (dbRow: DbUserRow): User => {
-    return {
-      tc: dbRow.TC,
-      name: dbRow.NAME,
-      surname: dbRow.SURNAME,
-      birthDate: dbRow.BIRTHDATE,
-      nameOfMother: dbRow.MOTHERNAME,
-      nameOfFather: dbRow.FATHERNAME,
-      fatherTC: dbRow.FATHERTC,
-      motherTC: dbRow.MOTHERTC,
-      city: dbRow.CITY,
-      county: dbRow.COUNTY,
-    };
+  // Arama formu submit olduğunda çalışacak
+  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setCurrentPage(1); // Arama yaptığımızda sayfa 1'e dönüyoruz
+    fetchData(1); // Arama yapıldığında 1. sayfayı çekiyoruz
   };
 
-  const mapDbToUserArray = (dbRows: DbUserRow[]): User[] => {
-    return dbRows.map(mapDbToUser);
-  };
+  // Sayfa numarası değiştiğinde yeni verileri çekmek için çalışacak
+  useEffect(() => {
+    if (currentPage > 0) {
+      fetchData(currentPage); // Sayfa numarası her değiştiğinde verileri çek
+    }
+  }, [currentPage]);
 
   return (
     <div className="w-full max-w-4xl mb-8 mt-8">
@@ -139,12 +109,29 @@ const SearchFilter: React.FC<SearchFilterProps> = ({ onSearch, currentPage }) =>
           </div>
         </div>
 
-        <div className="flex justify-end">
+        <div className="flex justify-between items-center">
+          {/* Gelişmiş Arama İkonu */}
           <button
-            className="px-4 py-2 h-10 rounded-md bg-background text-foreground border border-gray-400 dark:border-gray-600"
+            type="button"
+            onClick={toggleAdvancedFilters}
+            className="text-blue-500 hover:text-blue-700 flex items-center"
+          >
+            <FontAwesomeIcon icon={isAdvancedOpen ? faChevronUp : faChevronDown} />
+          </button>
+
+          {/* Arama Butonu */}
+          <button
+            className="px-4 py-2 h-10 rounded-md bg-blue-500 text-white flex items-center"
             type="submit"
           >
-            {loading ? "Ara..." : "Ara"}
+            {loading ? (
+              <span>Aranıyor...</span>
+            ) : (
+              <>
+                <span>Ara</span>
+                <FontAwesomeIcon icon={faSearch} className="ml-2" />
+              </>
+            )}
           </button>
         </div>
 
@@ -154,7 +141,6 @@ const SearchFilter: React.FC<SearchFilterProps> = ({ onSearch, currentPage }) =>
             <h2 className="text-base font-medium mb-2">Gelişmiş Filtreler</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {/* Date Range Filter */}
               <div className="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs mb-1">Doğum Tarihi Başlangıç</label>
@@ -209,16 +195,6 @@ const SearchFilter: React.FC<SearchFilterProps> = ({ onSearch, currentPage }) =>
                   className="w-full p-1 border border-gray-300 dark:border-gray-600 rounded-md bg-background text-foreground text-sm"
                 />
               </div>
-            </div>
-
-            {/* Filtreleme Butonu */}
-            <div className="flex justify-end mt-3">
-              <button
-                type="submit"
-                className="px-3 py-1 bg-blue-500 text-white rounded-md text-sm"
-              >
-                {loading ? "Filtrele..." : "Filtrele"}
-              </button>
             </div>
           </div>
         )}

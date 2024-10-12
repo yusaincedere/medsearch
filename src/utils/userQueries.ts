@@ -15,39 +15,35 @@ export const getUsers = async (page: number, limit: number, filters: UserFilter)
     // Sayfalama için offset hesaplama
     const offset = (page - 1) * limit;
 
-    // Dinamik SQL sorgusu: name, surname, tcno gibi filtreleri işle
+    // Dinamik SQL sorgusu: name, surname, tc gibi filtreleri işle
     let query = 'SELECT * FROM medinfo WHERE 1=1';
     let countQuery = 'SELECT COUNT(*) as total FROM medinfo WHERE 1=1';
     const params: any[] = [];
     const countParams: any[] = [];
+    
+    console.log(filters)
+    // TC filtreleme
+    if (filters.tc && filters.tc.trim() !== "") {
+      query += ' AND tc = ?';
+      countQuery += ' AND tc = ?';
+      params.push(filters.tc.trim()); // TC numarasını string olarak işliyoruz
+      countParams.push(filters.tc.trim());
+    }
 
-    // Eğer filtrelerde isim varsa
+    // İsim filtreleme
     if (filters.name) {
-      // Girilen değeri kontrol ediyoruz, rakam mı, isim mi yoksa isim soyisim mi
-      const nameParts = filters.name.trim().split(' ');
+      query += ' AND name = ?';
+      countQuery += ' AND name = ?';
+      params.push(`${filters.name}`);
+      countParams.push(`${filters.name}`);
+    }
 
-      // Eğer girilen değer sadece rakamlardan oluşuyorsa TCNO'da arama yap
-      if (/^\d+$/.test(filters.name)) {
-        query += ' AND tc = ?';
-        countQuery += ' AND tc = ?';
-        params.push(filters.name);
-        countParams.push(filters.name);
-      } 
-      // Eğer "isim soyisim" girilmişse
-      else if (nameParts.length === 2) {
-        const [firstName, lastName] = nameParts;
-        query += ' AND name = ? AND surname = ?';
-        countQuery += ' AND name = ? AND surname = ?';
-        params.push(`${firstName}`, `${lastName}`);
-        countParams.push(`${firstName}`, `${lastName}`);
-      } 
-      // Sadece isim girilmişse
-      else {
-        query += ' AND name = ?';
-        countQuery += ' AND name = ?';
-        params.push(`${filters.name}`);
-        countParams.push(`${filters.name}`);
-      }
+    // Soyisim filtreleme
+    if (filters.surname) {
+      query += ' AND surname = ?';
+      countQuery += ' AND surname = ?';
+      params.push(`${filters.surname}`);
+      countParams.push(`${filters.surname}`);
     }
 
     // Limit ve offset ekleme

@@ -1,8 +1,10 @@
 import { FC } from "react";
+import Pagination from "./Pagination";
 
 interface UserTableProps {
   userData: User[];
   totalPages: number;
+  totalUser: number;
   currentPage: number;
   onPageChange: (page: number) => void; // Sayfa değişikliklerinde tetiklenen fonksiyon
 }
@@ -10,6 +12,7 @@ interface UserTableProps {
 const UserTable: FC<UserTableProps> = ({
   userData,
   totalPages,
+  totalUser,
   currentPage,
   onPageChange,
 }) => {
@@ -98,25 +101,12 @@ const UserTable: FC<UserTableProps> = ({
 
       {/* Pagination Kontrolleri */}
       {totalPages > 1 && (
-        <div className="flex justify-between mt-4">
-          <button
-            className="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded"
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-          >
-            Önceki
-          </button>
-          <span className="px-3 py-1">
-            Sayfa {currentPage} / {totalPages}
-          </span>
-          <button
-            className="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded"
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-          >
-            Sonraki
-          </button>
-        </div>
+        <Pagination
+        totalItems={totalUser}
+        totalPages={totalPages}
+        currentPage={currentPage}
+        onPageChange={handlePageChange}
+      />
       )}
     </div>
   );

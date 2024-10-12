@@ -11,11 +11,13 @@ export default function Home() {
   const [results, setResults] = useState<User[]>([]); // Arama sonuçları
   const [currentPage, setCurrentPage] = useState<number>(1); // Mevcut sayfa
   const [totalPages, setTotalPages] = useState<number>(1); // Toplam sayfa sayısı
-
+  const [totalUser,setTotalUser] = useState<number>(1); // Toplam kullanıcı sayısı
+ 
   // Arama bileşeninden gelen verileri işlemek için callback fonksiyonu
-  const handleSearchResults = (data: User[], page: number, totalPages: number) => {
+  const handleSearchResults = (data: User[], page: number, totalPages: number, totalUser:number) => {
     setResults(data);
     setCurrentPage(page);
+    setTotalUser(totalUser);
     setTotalPages(totalPages);
   };
 
@@ -27,11 +29,16 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background text-foreground">
       <h1 className="text-5xl font-bold mb-6">MedSearch</h1>
-      <SearchFilter onSearch={handleSearchResults} currentPage={currentPage} />
+      <SearchFilter
+       onSearch={handleSearchResults} 
+       currentPage={currentPage} 
+       setCurrentPage={setCurrentPage}
+       />
       <UserTable
         userData={results}
         currentPage={currentPage}
         totalPages={totalPages}
+        totalUser={totalUser}
         onPageChange={handlePageChange}
       />
     </div>

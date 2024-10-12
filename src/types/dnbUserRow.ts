@@ -1,5 +1,5 @@
 export type DbUserRow = {
-    TC: number;
+    TC: string;
     NAME: string;
     SURNAME: string;
     BIRTHDATE: string;

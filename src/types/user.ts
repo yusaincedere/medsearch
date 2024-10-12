@@ -1,5 +1,5 @@
 type User = {
-    tc: number;
+    tc: string;
     name: string;
     surname: string;
     birthDate: string; // Date tipi, API'den string olarak gelir
